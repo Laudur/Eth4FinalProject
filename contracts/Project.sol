@@ -51,4 +51,12 @@ contract Project {
 	function getName() returns(bytes32) {
 		return attribs.name;
 	}
+
+	function getGoal() returns(uint) {
+		return attribs.goalAmount;
+	}
+
+	function getDeadline() returns(uint) {
+		return attribs.deadline;
+	}
 }

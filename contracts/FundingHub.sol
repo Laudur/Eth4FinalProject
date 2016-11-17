@@ -33,8 +33,11 @@ contract FundingHub {
 	    return projects[projectID];
 	}
 	
-	function getProjectName(uint projectID) constant returns(bytes32) {
-	    bytes32 n = projects[projectID].getName();
-	    return n;
+	function getProjectInfo(uint projectID) constant returns(bytes32, uint, uint) {
+	    Project p = projects[projectID];
+	    bytes32 n = p.getName();
+	    uint g = p.getGoal();
+	    uint d = p.getDeadline();
+	    return (n, g, d);
 	}
 }

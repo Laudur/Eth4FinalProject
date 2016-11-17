@@ -31847,6 +31847,14 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 			});
 	};
 
+	$scope.hex2str = function hex2a(hexx) {
+	    var hex = hexx.toString();//force conversion
+	    var str = '';
+	    for (var i = 0; i < hex.length; i += 2)
+		str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+	    return str;
+	}
+
 
 	$scope.collectProjects = function() {
 		$scope.projects = [];
@@ -31857,20 +31865,22 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 					if (count.valueOf() > 0) {
 						for (var i = 0; i < count.valueOf(); i++) {
 							console.log("i="+i);
-							/*FundingHub.deployed().getProjectName.call(i, {from: $scope.account})
+							FundingHub.deployed().getProjectInfo.call(i, {from: $scope.account})
 								.then(function (values) {
 									console.log("OK"+values);
 									$timeout(function () {
 										console.log("OK1"+values.valueOf());
 										$scope.projects.push({
-											name: values.valueOf()
+											name: $scope.hex2str(values[0]),
+											goal: values[1].valueOf(),
+											deadline: values[2].valueOf(),
 										});
 									});
 								})
 								.catch(function (e) {
 									console.log("NOK");
 									console.error(e);
-								});*/							
+								});						
 						}
 					}
 				});

@@ -9,9 +9,9 @@ contract FundingHub {
 		//createProject(tx.origin, "Test",  0, 0);
 	}
 
-	function createProject(address _owner, string _name,  uint _goal, uint _deadline) returns(uint projectID) {
-		Project p = new Project(_owner, _name,  _goal, _deadline);
-		projects[projects.length] = p;
+	function createProject(bytes32 _name,  uint _goal, uint _deadline) returns(uint projectID) {
+		Project p = new Project(msg.sender, _name,  _goal, _deadline);
+		projects.push(p);
 		return projects.length;
 	}
 	
@@ -27,5 +27,14 @@ contract FundingHub {
 
 	function getProjectCount(address addr) returns(uint) {
 	    return projects.length;
+	}
+	
+	function getProject(uint projectID) returns(Project) {
+	    return projects[projectID];
+	}
+	
+	function getProjectName(uint projectID) constant returns(bytes32) {
+	    bytes32 n = projects[projectID].getName();
+	    return n;
 	}
 }

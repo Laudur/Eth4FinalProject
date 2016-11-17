@@ -4,14 +4,14 @@ contract Project {
         
     struct Attribs{
         address owner;
-        string name;
+        bytes32 name;
         uint goalAmount;
         uint deadline;
         uint funders;
         uint amount;
     }
     
-    Attribs attribs;
+    Attribs public attribs;
     
     struct Funder {
         address addr;
@@ -20,8 +20,8 @@ contract Project {
     
     mapping (uint => Funder) funders;
 
-	function Project(address _owner, string _name,  uint _goal, uint _deadline) {
-        attribs = Attribs(_owner, _name,  _goal, _deadline, 0, 0);
+	function Project(address _owner, bytes32 _name,  uint _goal, uint _deadline) {
+		attribs = Attribs(_owner, _name,  _goal, _deadline, 0, 0);
 	}
 
 	function fund(address funder) returns(bool sufficient) {
@@ -41,5 +41,14 @@ contract Project {
 	
 	function refund(address addr) returns(bool) {
 		return true;
+	}
+	
+	
+	function getAttribs() internal returns(Attribs) {
+		return attribs;
+	}
+	
+	function getName() returns(bytes32) {
+		return attribs.name;
 	}
 }

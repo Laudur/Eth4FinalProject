@@ -2,21 +2,46 @@
 <html>
 <head>
   <title>FundingHub</title>
+  <base href="." />
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
   <link href="./app.css" rel='stylesheet' type='text/css'>
   <script src="./app.js"></script>
+  <script src="./fundingHub.js"></script>
 </head>
-<body>
+<body ng-app="fundingHubApp" ng-controller="fundingHubController">
   <h1>FundingHub</h1>
-  <h2>Example Truffle Dapp</h2>
-  <h3>You have <span class="black"><span id="projectCount"></span> projects</span></h3>
+  <h2>Decentralised crowdfunding application</h2>
+
+  <fieldset>
+    <!--<span for="id">Id:</span>
+    <input type="number" id="id" placeholder="1" ng-model="newId"/>-->
+    <label for="name">Project name:</label>
+    <input type="text" id="name" placeholder="My Project" ng-model="newName"/><br/>
+    <label for="goal">Goal:</label>
+    <input type="number" id="goal" placeholder="50000" ng-model="newGoal"/><br/>
+    <label for="deadline">Deadline:</label>
+    <input type="number" id="deadline" placeholder="1050500" ng-model="newDeadline"/><br/>
+    <button id="addProject" ng-click="addProject(newName, newGoal, newDeadline)">Add Project</button>
+  </fieldset>
 
   <br>
-  <h1>Send</h1>
-  <br><label for="amount">Amount:</label><input type="text" id="amount" placeholder="e.g., 95"></input>
-  <br><label for="receiver">To Address:</label><input type="text" id="receiver" placeholder="e.g., 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae"></input>
-  <br><br><button id="send" onclick="sendCoin()">Send Coin</button>
-  <br><br>
-  <span id="status"></span>
+  Project Count: <span id="prCount">{{ prCount }}</span>
+  <br>
+  <span id="status">{{ status }}</span>
+
+
+<table>
+  <tr>
+    <td>Project name</td>
+    <td>Goal</td>
+    <td>Deadline</td>
+  </tr>
+  <tr ng-repeat="x in projects | orderBy : 'name'">
+    <td>{{ x.name }}</td>
+    <td>{{ x.goal }}</td>
+    <td>{{ x.deadline }}</td>
+  </tr>
+</table>
+
 </body>
 </html>

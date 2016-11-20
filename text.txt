@@ -2,4 +2,4 @@
 
 
 
-geth --datadir ~/.ethereum/net42 --networkid 42 --rpc --rpcport 8545 --rpcaddr 0.0.0.0 --rpccorsdomain "*" --rpcapi "eth,web3" --cache=2048 --jitvm --password pass.txt -unlock "0" console
+geth --datadir ~/.ethereum/net88 --networkid 88 --rpc --rpcport 8545 --rpcaddr 0.0.0.0 --rpccorsdomain "*" --rpcapi "eth,web3" --fast --cache=2048 --jitvm --password pass.txt -unlock "0" console

@@ -1,43 +1,41 @@
-pragma solidity ^0.4.2;
+pragma solidity ^0.4.4;
 
 import "Project.sol";
 
 contract FundingHub {
 	Project[] projects;
-
+uint t=9;
 	function FundingHub() {
-		//createProject(tx.origin, "Test",  0, 0);
 	}
 
-	function createProject(bytes32 _name,  uint _goal, uint _deadline) returns(uint projectID) {
-		Project p = new Project(msg.sender, _name,  _goal, _deadline);
+	function createProject(bytes32 name,  uint goal, uint deadline) returns(uint projectID) {
+		Project p = new Project(msg.sender, name,  goal, deadline);
 		projects.push(p);
 		return projects.length;
 	}
 	
-	function contribute(uint _projectID) returns(bool) {
+	function contribute(uint projectID) payable returns(bool) {
 	    if (msg.value>0){
-	        projects[_projectID].fund(msg.sender);
-		    return true;
+	        Project p = projects[projectID];
+	        p.fund.value(msg.value)();
+	        return true;
 	    }
-		else{
-		    return false;
-		}
 	}
 
 	function getProjectCount(address addr) returns(uint) {
 	    return projects.length;
 	}
-	
-	function getProject(uint projectID) returns(Project) {
-	    return projects[projectID];
+
+	function refund(uint projectID) returns(bool) {
+		Project p = projects[projectID];
+		p.refund();
+		return true;
 	}
 	
-	function getProjectInfo(uint projectID) constant returns(bytes32, uint, uint) {
+	function getProjectInfo(uint projectID) constant returns(uint id, bytes32 name, uint goalAmount, uint deadline, address owner, uint amountRaised, uint myAmount) {
 	    Project p = projects[projectID];
-	    bytes32 n = p.getName();
-	    uint g = p.getGoal();
-	    uint d = p.getDeadline();
-	    return (n, g, d);
+	    (name, goalAmount, deadline, owner, amountRaised, myAmount)= p.getInfo();
+	    id = projectID;
+	    //return (projectID, name, goalAmount, deadline, owner, amountRaised);
 	}
 }

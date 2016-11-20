@@ -1,62 +1,77 @@
-pragma solidity ^0.4.2;
+pragma solidity ^0.4.4;
 
 contract Project {
-        
     struct Attribs{
         address owner;
         bytes32 name;
         uint goalAmount;
         uint deadline;
         uint funders;
-        uint amount;
+        uint amountRaised;
     }
     
-    Attribs public attribs;
+    Attribs attribs;
+    address[] funders;
+    mapping (address => uint) amounts;
     
-    struct Funder {
-        address addr;
-        uint amount;
-    }
+    modifier onlyOwner() { if (tx.origin == attribs.owner) _; else throw;}
+    modifier onlyFunder() { if (amounts[tx.origin] > 0) _; else throw;}
+    modifier afterDeadline() { if (attribs.deadline <= now) _; else throw;}
     
-    mapping (uint => Funder) funders;
-
 	function Project(address _owner, bytes32 _name,  uint _goal, uint _deadline) {
-		attribs = Attribs(_owner, _name,  _goal, _deadline, 0, 0);
+		attribs = Attribs(_owner, _name,  _goal, now + _deadline, 0, 0);
 	}
 
-	function fund(address funder) returns(bool sufficient) {
-        if (msg.value>0){
-            funders[attribs.funders++] = Funder(funder, msg.value);
-	        attribs.amount += msg.value;
-		    return true;
-        }
-	    else{
-		    return false;  
+	function fund() payable returns(bool) {
+	    uint v = msg.value;
+	    uint back;
+		if (v > 0){
+		    if(attribs.deadline > now && attribs.goalAmount > attribs.amountRaised){
+		        
+		        //when funding amount exeeds goal
+                if(attribs.amountRaised + msg.value > attribs.goalAmount){
+                    v = attribs.goalAmount - attribs.amountRaised;
+                    back = attribs.amountRaised + msg.value - attribs.goalAmount;
+    		        if(!tx.origin.send(back))
+    		            throw;
+                }
+                
+	            amounts[tx.origin] += v;
+		        funders.push(tx.origin);
+	    	    attribs.amountRaised += v;
+		    }
+		    else{
+		        if(!tx.origin.send(msg.value))
+		            throw;
+		    }
 		}
+        
+		return true;
 	}
 
-	function payout(address addr) returns(bool) {
+	function payout() onlyOwner() afterDeadline() returns(bool) {
+	    if(!attribs.owner.send(this.balance))
+	        throw;
+	    
 		return true;
 	}
 	
-	function refund(address addr) returns(bool) {
+	function refund() onlyFunder() returns(bool) {
+	    uint v = amounts[tx.origin];
+	    amounts[tx.origin] = 0;
+	    
+	    if(!tx.origin.send(v))
+	        throw;
+	    
+	    attribs.amountRaised -= v;
 		return true;
 	}
-	
-	
-	function getAttribs() internal returns(Attribs) {
-		return attribs;
-	}
-	
-	function getName() returns(bytes32) {
-		return attribs.name;
+
+	function getInfo() returns(bytes32, uint, uint, address, uint, uint) {
+		return (attribs.name, this.balance+1, attribs.deadline, attribs.owner, attribs.amountRaised, amounts[tx.origin]);
 	}
 
-	function getGoal() returns(uint) {
-		return attribs.goalAmount;
-	}
-
-	function getDeadline() returns(uint) {
-		return attribs.deadline;
+	function getAmountRaised() returns(uint) {
+		return attribs.amountRaised;
 	}
 }

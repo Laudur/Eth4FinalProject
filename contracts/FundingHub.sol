@@ -4,7 +4,7 @@ import "Project.sol";
 
 contract FundingHub {
 	Project[] projects;
-uint t=9;
+
 	function FundingHub() {
 	}
 

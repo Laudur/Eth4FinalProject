@@ -31810,7 +31810,7 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
  	$scope.account = "";
 	$scope.prCount = "";
 	$scope.status = "";
-$scope.balance="";
+	$scope.balance="";
 
 	$scope.reFund = function(projectId) {
 
@@ -31893,7 +31893,7 @@ $scope.balance="";
 
 	$scope.collectProjects = function() {
 		//$scope.balance = web3.eth.getBalance("'"+$scope.account+"'");
-		$scope.balance = $scope.account;
+		$scope.balance = web3.eth.getBalance($scope.account).valueOf();
 		$scope.projects = [];
 		FundingHub.deployed().getProjectCount.call($scope.account, {from: $scope.account})
 			.then(function (count) {
@@ -31929,7 +31929,6 @@ $scope.balance="";
 	};
 
 	$window.onload = function () {
-
 		initUtils(web3);
 		web3.eth.getAccounts(function(err, accs) {
 			if (err != null) {
@@ -31944,12 +31943,11 @@ $scope.balance="";
 
 			$scope.accounts = accs;
             		$scope.account = $scope.accounts[0];
-console.log($scope.account);
-		});	
-
-		$scope.refreshBalance();
-		$scope.collectProjects();
-
+			$scope.balance = web3.eth.getBalance($scope.account).valueOf();
+			console.log($scope.account);
+			$scope.refreshBalance();
+			$scope.collectProjects();
+		});
 	}
 
 }]);

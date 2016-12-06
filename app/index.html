@@ -11,30 +11,32 @@
 <body ng-app="fundingHubApp" ng-controller="fundingHubController">
   <h1>FundingHub</h1>
   <h2>Decentralised crowdfunding application</h2>
-  <h3><span id="account">{{ account }}</span></td></h3>
+  <h3>Account: <span id="account">{{ account }}</span></td></h3>
   <h3>Balance: <span id="balance">{{ balance }}</span></td></h3>
 	<h3>Projects</h3>
 	<table>
 	  <tr>
+	    <td>Project id</td>
 	    <td>Project name</td>
 	    <td>Goal</td>
 	    <td>Deadline</td>
-	    <td>Total amount raised</td>
-	    <td>My funding</td>
+	    <td>Amount raised</td>
+	    <td>My contribution</td>
 	  </tr>
-	  <tr ng-repeat="x in projects | orderBy : 'x.projectId'">
+	  <tr ng-repeat="x in projects | orderBy : 'projectId'">
+	    <td>{{ x.projectId }}</td>
 	    <td>{{ x.name }}</td>
 	    <td>{{ x.goal }}</td>
 	    <td>{{ x.deadline | date:'yyyy-MM-dd HH:mm:ss'}}</td>
 	    <td>{{ x.raised }}</td>
 	    <td>{{ x.myFunding }}</td>
-	    <td><input type="number" id="fundAmount" style="width:60px" placeholder="15" ng-model="fundAmount"/><br/></td>
-	    <td><button id="fundProject" ng-click="fundProject(x.projectId, fundAmount)">Fund Project</button>
-    	    <span id="fundstatus">{{ fundstatus }}</span></td>
-	    <td><button id="reFund" ng-click="reFund(x.projectId)">Refund</button>
-    	    <span id="refundstatus">{{ refundstatus }}</span></td>
+	    <td><input type="number" id="fundAmount" style="width:60px" placeholder="15" ng-model="fundAmount"/>
+	    <button id="fundProject" ng-click="fundProject(x.projectId, fundAmount, x.name)">Fund Project</button></td>
+	    <td><button id="reFund" ng-click="reFund(x.projectId, x.name)">Refund</button></td>
 	  </tr>
 	</table>
+</br>
+<span id="status">{{ status }}</span>
 </br>
 <h3>Add my project</h3>
 <label for="name">Project name:</label>
@@ -43,8 +45,7 @@
 <input type="number" id="goal" placeholder="50000" ng-model="newGoal"/><br/>
 <label for="deadline">Funding time (min):</label>
 <input type="number" id="deadline" placeholder="1050500" ng-model="newDeadline"/><br/>
-<button id="addProject" ng-click="addProject(newName, newGoal, newDeadline)">Add Project</button>
-<span id="status">{{ status }}</span>
+<label for="mmm"></label><button id="addProject" ng-click="addProject(newName, newGoal, newDeadline)">Add Project</button>
 
 </body>
 </html>

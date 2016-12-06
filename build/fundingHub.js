@@ -31812,10 +31812,10 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 	$scope.status = "";
 	$scope.balance="";
 
-	$scope.reFund = function(projectId) {
+	$scope.reFund = function(projectId, name) {
 
 		console.log("Refund projectId="+projectId);
-		$scope.refundstatus = "refunding...";
+		$scope.status = "Refunding from project "+name;
 		FundingHub.deployed()
 			.refund(
 				projectId,
@@ -31825,15 +31825,15 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 			})
 			.then(function (receipt) {
 				console.log("project refundeded "+receipt);
-				$scope.refundstatus = "refunded";
+				$scope.status = "Project "+name+" refunded";
 				$scope.collectProjects();
 			});
 	};
 
-	$scope.fundProject = function(projectId, fundAmont) {
+	$scope.fundProject = function(projectId, fundAmont, name) {
 
 		console.log("projectId="+projectId+" fundAmont="+fundAmont);
-		$scope.fundstatus = "funding project...";
+		$scope.status = "Funding project "+name;
 		FundingHub.deployed()
 			.contribute(
 				projectId,
@@ -31842,29 +31842,15 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 				return web3.eth.getTransactionReceiptMined(tx);
 			})
 			.then(function (receipt) {
-				console.log("project funded "+receipt);
-				$scope.fundstatus = "Project funded";
+				console.log("Project "+name+" funded "+receipt);
+				$scope.status = "Project funded";
 				$scope.collectProjects();
 			});
-	};
-
-	$scope.refreshBalance = function() {
-
-	  FundingHub.deployed().getProjectCount.call($scope.account, {from: $scope.account})
-		.then(function(value) {
-		    $timeout(function () {
-		        $scope.prCount = value.valueOf();
-		    });
-	    console.log("Project count = "+value.valueOf());
-	  }).catch(function(e) {
-	    console.log(e);
-	    $scope.status = "Error getting balance; see log.";
-	  });
 	};
     
 	$scope.addProject = function(newName, newGoal, newDeadline) {
 		console.log(newName+ newGoal+ newDeadline);
-		$scope.status = "Adding project";
+		$scope.status = "Adding project "+newName;
 		FundingHub.deployed()
 			.createProject(
 				newName,
@@ -31876,8 +31862,7 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 			})
 			.then(function (receipt) {
 				console.log("project added");
-				$scope.status = "Project added";
-				$scope.refreshBalance();
+				$scope.status = "Project "+newName+" added";
 				$scope.collectProjects();
 			});
 	};
@@ -31898,15 +31883,12 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 		FundingHub.deployed().getProjectCount.call($scope.account, {from: $scope.account})
 			.then(function (count) {
 				$timeout(function () {
-					console.log("Count="+count.valueOf());
 					if (count.valueOf() > 0) {
 						for (var i = 0; i < count.valueOf(); i++) {
 							FundingHub.deployed().getProjectInfo.call(i, {from: $scope.account})
 								.then(function (values) {
 									$timeout(function () {
-										console.log("OK "+values.valueOf());
-										var d = new Date(1970, 0, 1);
-										console.log("date "+d);
+										console.log("name="+values[0].valueOf()+" "+values[1]);
 										$scope.projects.push({
 											projectId: values[0].valueOf(),
 											name: $scope.hex2str(values[1]),
@@ -31945,7 +31927,6 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
             		$scope.account = $scope.accounts[0];
 			$scope.balance = web3.eth.getBalance($scope.account).valueOf();
 			console.log($scope.account);
-			$scope.refreshBalance();
 			$scope.collectProjects();
 		});
 	}

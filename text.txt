@@ -3,3 +3,16 @@
 
 
 geth --datadir ~/.ethereum/net88 --networkid 88 --rpc --rpcport 8545 --rpcaddr 0.0.0.0 --rpccorsdomain "*" --rpcapi "eth,web3" --fast --cache=2048 --jitvm --password pass.txt -unlock "0" console
+
+
+$ mkdir app/javascripts/_vendor
+$ cd app/javascripts/_vendor
+$ curl "https://raw.githubusercontent.com/ConsenSys/hooked-web3-provider/master/build/hooked-web3-provider.js" -O
+$ curl "https://raw.githubusercontent.com/ConsenSys/eth-lightwallet/master/dist/lightwallet.js" -O
+
+saddle genuine pen lab exhibit trade diary chaos pause just item squirrel
+123
+0xf160130f6cefa7a83784db8685b0031fa010e349
+
+approve small share shy bring narrow reason region reveal gown vital dream
+123

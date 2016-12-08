@@ -25,12 +25,6 @@ contract FundingHub {
 	function getProjectCount(address addr) returns(uint) {
 	    return projects.length;
 	}
-
-	function refund(uint projectID) returns(bool) {
-		Project p = projects[projectID];
-		p.refund();
-		return true;
-	}
 	
 	function getProjectInfo(uint projectID) constant returns(uint id, bytes32 name, uint goalAmount, uint deadline, address owner, uint amountRaised, uint myAmount) {
 	    Project p = projects[projectID];

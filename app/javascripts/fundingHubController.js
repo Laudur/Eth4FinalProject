@@ -18,7 +18,7 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 		FundingHub.deployed()
 			.refund(
 				projectId,
-				{ from: $scope.account, gas: 3000000})
+				{ from: $scope.account, gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)})
 			.then(function (tx) {
 				return web3.eth.getTransactionReceiptMined(tx);
 			})
@@ -36,13 +36,13 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 		FundingHub.deployed()
 			.contribute(
 				projectId,
-				{ from: $scope.account, gas: 3000000, value: fundAmont})
+				{ from: $scope.account, gas: 3000000, value: fundAmont, gasPrice: web3.eth.gasPrice.toString(10)})
 			.then(function (tx) {
 				return web3.eth.getTransactionReceiptMined(tx);
 			})
 			.then(function (receipt) {
-				console.log("Project "+name+" funded "+receipt);
-				$scope.status = "Project funded";
+				console.log("Project "+name+" funded");
+				$scope.status = "Project "+name+" funded";
 				$scope.collectProjects();
 			});
 	};
@@ -55,7 +55,7 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 				newName,
 				newGoal,
 				newDeadline*60,
-				{ from: $scope.account, gas: 3000000 })
+				{ from: $scope.account, gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10) })
 			.then(function (tx) {
 				return web3.eth.getTransactionReceiptMined(tx);
 			})
@@ -109,7 +109,7 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 			});
 	};
 
-	$window.onload = function () {
+	/*$window.onload = function () {
 		initUtils(web3);
 		web3.eth.getAccounts(function(err, accs) {
 			if (err != null) {
@@ -124,6 +124,41 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 
 			$scope.accounts = accs;
             		$scope.account = $scope.accounts[0];
+			$scope.balance = web3.eth.getBalance($scope.account).valueOf();
+			console.log($scope.account);
+			$scope.collectProjects();
+		});
+	}*/
+	$window.onload = function () {
+		    initUtils(web3);
+		    // Example of seed 'unhappy nerve cancel reject october fix vital pulse cash behind curious bicycle'
+		    var seed = prompt('Enter your private key seed', '12 words long');;
+		    // the seed is stored in memory and encrypted by this user-defined password
+		    var password = prompt('Enter password to encrypt the seed', 'dev_password');
+
+		    lightwallet.keystore.deriveKeyFromPassword(password, function(err, _pwDerivedKey) {
+			pwDerivedKey = _pwDerivedKey;
+			ks = new lightwallet.keystore(seed, pwDerivedKey);
+			// Create a custom passwordProvider to prompt the user to enter their
+			// password whenever the hooked web3 provider issues a sendTransaction
+			// call.
+			ks.passwordProvider = function (callback) {
+			    var pw = prompt("Please enter password to sign your transaction", "dev_password");
+			    callback(null, pw);
+			};
+			var provider = new HookedWeb3Provider({
+			    // Let's pick the one that came with Truffle
+			    host: web3.currentProvider.host,
+			    transaction_signer: ks
+			});
+			web3.setProvider(provider);
+			// And since Truffle v2 uses EtherPudding v3, we also need the line:
+			FundingHub.setProvider(provider);
+			// Generate the first address out of the seed
+			ks.generateNewAddress(pwDerivedKey);
+			$scope.accounts = ks.getAddresses();
+			$scope.account = "0x" + $scope.accounts[0];
+			console.log("Your account is " + $scope.account);
 			$scope.balance = web3.eth.getBalance($scope.account).valueOf();
 			console.log($scope.account);
 			$scope.collectProjects();

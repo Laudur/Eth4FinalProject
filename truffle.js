@@ -3,11 +3,13 @@ module.exports = {
     "index.html": "index.html",
     "app.js": [
       "javascripts/app.js"
-    ],
+	],
     "fundingHub.js": [
       "javascripts/angular.js",
       "javascripts/utils.js",
-      "javascripts/fundingHubController.js"
+      "javascripts/fundingHubController.js",
+      "javascripts/_vendor/lightwallet.js",
+      "javascripts/_vendor/hooked-web3-provider.js"
 	],
     "app.css": [
       "stylesheets/app.css"

@@ -15,7 +15,6 @@ contract Project {
     mapping (address => uint) amounts;
     
     modifier onlyOwner() { if (tx.origin == attribs.owner) _; else throw;}
-    modifier onlyFunder() { if (amounts[tx.origin] > 0) _; else throw;}
     modifier afterDeadline() { if (attribs.deadline <= now) _;}
     modifier raisedLess() { if (attribs.amountRaised < attribs.goalAmount) _;}
     
@@ -56,14 +55,32 @@ contract Project {
         return true;
     }
 	
-    function refund() onlyFunder() raisedLess() returns(bool) {
-        uint v = amounts[tx.origin];
-        amounts[tx.origin] = 0;
+    function refund() raisedLess() returns(bool) {
+        uint v;
+        if(msg.sender==attribs.owner){
+            for (uint i = 0; i<funders.length; i++){
+                address funder = funders[i];
+                v = amounts[funder];
         
-        if(!tx.origin.send(v))
-            throw;
-        
-        attribs.amountRaised -= v;
+                if(v > 0){
+                    amounts[funder] = 0;
+                    
+                    if(funder.send(v)){
+                        attribs.amountRaised -= v;
+                    }
+                }
+            }
+        }else{
+            v = amounts[msg.sender];
+            if(v > 0){
+                amounts[msg.sender] = 0;
+                
+                if(!msg.sender.send(v))
+                    throw;
+                
+                attribs.amountRaised -= v;
+            }
+        }
         return true;
     }
 

@@ -11,14 +11,13 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 	$scope.status = "";
 	$scope.balance="";
 
-	$scope.reFund = function(projectId, name) {
+	$scope.reFund = function(projectAddr, name) {
 
-		console.log("Refund projectId="+projectId);
+		console.log("Refund projectId="+projectAddr);
 		$scope.status = "Refunding from project "+name;
-		FundingHub.deployed()
+		Project.at(projectAddr)
 			.refund(
-				projectId,
-				{ from: $scope.account, gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)})
+				{ from: $scope.account, gas: 500000, gasPrice: web3.eth.gasPrice.toString(10)})
 			.then(function (tx) {
 				return web3.eth.getTransactionReceiptMined(tx);
 			})
@@ -36,7 +35,7 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 		FundingHub.deployed()
 			.contribute(
 				projectId,
-				{ from: $scope.account, gas: 3000000, value: fundAmont, gasPrice: web3.eth.gasPrice.toString(10)})
+				{ from: $scope.account, gas: 500000, value: fundAmont, gasPrice: web3.eth.gasPrice.toString(10)})
 			.then(function (tx) {
 				return web3.eth.getTransactionReceiptMined(tx);
 			})
@@ -55,7 +54,7 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 				newName,
 				newGoal,
 				newDeadline*60,
-				{ from: $scope.account, gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10) })
+				{ from: $scope.account, gas: 500000, gasPrice: web3.eth.gasPrice.toString(10) })
 			.then(function (tx) {
 				return web3.eth.getTransactionReceiptMined(tx);
 			})
@@ -76,7 +75,6 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 
 
 	$scope.collectProjects = function() {
-		//$scope.balance = web3.eth.getBalance("'"+$scope.account+"'");
 		$scope.balance = web3.eth.getBalance($scope.account).valueOf();
 		$scope.projects = [];
 		FundingHub.deployed().getProjectCount.call($scope.account, {from: $scope.account})
@@ -95,7 +93,8 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 											deadline: values[3].valueOf()*1000,
 											owner: values[4].valueOf(),
 											raised: values[5].valueOf(),
-											myFunding: values[6].valueOf()
+											myFunding: values[6].valueOf(),
+											address: values[7].valueOf()
 										});
 									});
 								})

@@ -65,9 +65,11 @@ contract Project {
                 if(v > 0){
                     amounts[funder] = 0;
                     
-                    if(funder.send(v)){
+                    if(funder.send(v))
                         attribs.amountRaised -= v;
-                    }
+                    else
+                        amounts[funder] = v;
+                    
                 }
             }
         }else{
@@ -76,7 +78,7 @@ contract Project {
                 amounts[msg.sender] = 0;
                 
                 if(!msg.sender.send(v))
-                    throw;
+                    amounts[msg.sender] = v;
                 
                 attribs.amountRaised -= v;
             }
@@ -85,10 +87,6 @@ contract Project {
     }
 
     function getInfo() returns(bytes32, uint, uint, address, uint, uint) {
-        return (attribs.name, attribs.goalAmount, attribs.deadline, attribs.owner, attribs.amountRaised, amounts[tx.origin]);
-    }
-
-    function getAmountRaised() returns(uint) {
-        return attribs.amountRaised;
+        return (attribs.name, attribs.goalAmount, attribs.deadline, attribs.owner, attribs.amountRaised, amounts[msg.sender]);
     }
 }

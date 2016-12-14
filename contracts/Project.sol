@@ -14,7 +14,7 @@ contract Project {
     address[] funders;
     mapping (address => uint) amounts;
     
-    modifier onlyOwner() { if (tx.origin == attribs.owner) _; else throw;}
+    modifier onlyOwner() { if (msg.sender == attribs.owner) _; else throw;}
     modifier afterDeadline() { if (attribs.deadline <= now) _;}
     modifier raisedLess() { if (attribs.amountRaised < attribs.goalAmount) _;}
     
@@ -22,30 +22,20 @@ contract Project {
         attribs = Attribs(_owner, _name,  _goal, now + _deadline, 0, 0);
     }
 
-    function fund() payable returns(bool) {
-        uint v = msg.value;
-        uint back;
-        if (v > 0){
+    function fund(address funder) payable returns(bool) {
+        if (msg.value > 0){
             if(attribs.deadline > now && attribs.goalAmount > attribs.amountRaised){
-                //when funding amount exeeds goal
-                if(attribs.amountRaised + msg.value > attribs.goalAmount){
-                    v = attribs.goalAmount - attribs.amountRaised;
-                    back = attribs.amountRaised + msg.value - attribs.goalAmount;
-                    if(!tx.origin.send(back))
-                        throw;
-                }
-                
-                amounts[tx.origin] += v;
-                funders.push(tx.origin);
-                attribs.amountRaised += v;
+                amounts[funder] += msg.value;
+                funders.push(funder);
+                attribs.amountRaised += msg.value;
             }
             else{
-                if(!tx.origin.send(msg.value))
-                    throw;
+                if(!funder.send(msg.value))
+                    return false;
             }
+            
+            return true;
         }
-        
-        return true;
     }
 
     function payout() onlyOwner() afterDeadline() returns(bool) {
@@ -69,7 +59,6 @@ contract Project {
                         attribs.amountRaised -= v;
                     else
                         amounts[funder] = v;
-                    
                 }
             }
         }else{
@@ -86,7 +75,7 @@ contract Project {
         return true;
     }
 
-    function getInfo() returns(bytes32, uint, uint, address, uint, uint) {
-        return (attribs.name, attribs.goalAmount, attribs.deadline, attribs.owner, attribs.amountRaised, amounts[msg.sender]);
+    function getInfo() constant returns(bytes32, uint, uint, address, uint, uint, address) {
+        return (attribs.name, attribs.goalAmount, attribs.deadline, attribs.owner, attribs.amountRaised, amounts[msg.sender], this);
     }
 }

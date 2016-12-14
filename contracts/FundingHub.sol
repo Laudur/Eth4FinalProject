@@ -14,23 +14,18 @@ contract FundingHub {
 		return projects.length;
 	}
 	
-	function contribute(uint projectID) payable returns(bool) {
+	function contribute(address project) payable returns(bool) {
 	    if (msg.value>0){
-	        Project p = projects[projectID];
-	        p.fund.value(msg.value)();
+	        Project(project).fund.value(msg.value)(msg.sender);
 	        return true;
 	    }
 	}
 
-	function getProjectCount(address addr) returns(uint) {
+	function getProjectCount(address addr) constant returns(uint) {
 	    return projects.length;
 	}
 	
-	function getProjectInfo(uint projectID) constant returns(uint id, bytes32 name, uint goalAmount, uint deadline, address owner, uint amountRaised, uint myAmount, address prAddr) {
-	    Project p = projects[projectID];
-	    (name, goalAmount, deadline, owner, amountRaised, myAmount)= p.getInfo();
-	    id = projectID;
-        prAddr = p;
-	    //return (projectID, name, goalAmount, deadline, owner, amountRaised);
+	function getProjectAddr(uint projectID) constant returns(address) {
+	    return projects[projectID];
 	}
 }

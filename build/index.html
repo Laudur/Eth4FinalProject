@@ -18,16 +18,14 @@
 	<h3>Projects</h3>
 	<table>
 	  <tr>
-	    <td>Project id</td>
 	    <td>Project name</td>
 	    <td>Goal</td>
 	    <td>Deadline</td>
 	    <td>Amount raised</td>
 	    <td>My contribution</td>
-	    <td>Adr</td>
+	    <td>Address</td>
 	  </tr>
 	  <tr ng-repeat="x in projects | orderBy : 'projectId'">
-	    <td>{{ x.projectId }}</td>
 	    <td>{{ x.name }}</td>
 	    <td>{{ x.goal }}</td>
 	    <td>{{ x.deadline | date:'yyyy-MM-dd HH:mm:ss'}}</td>
@@ -35,7 +33,7 @@
 	    <td>{{ x.myFunding }}</td>
 	    <td>{{ x.address }}</td>
 	    <td><input type="number" id="fundAmount" style="width:60px" placeholder="15" ng-model="fundAmount"/>
-	    <button id="fundProject" ng-click="fundProject(x.projectId, fundAmount, x.name)">Fund Project</button></td>
+	    <button id="fundProject" ng-click="fundProject(x.address, fundAmount, x.name)">Fund Project</button></td>
 	    <td><button id="reFund" ng-click="reFund(x.address, x.name)">Refund</button></td>
 	  </tr>
 	</table>

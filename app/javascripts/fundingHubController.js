@@ -78,6 +78,9 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 	$scope.collectProjects = function() {
 		$scope.balance = web3.eth.getBalance($scope.account).valueOf();
 		$scope.projects = [];
+		var dt = new Date();
+		var date = dt.getTime();
+		console.log("Time: "+date);
 		FundingHub.deployed().getProjectCount.call($scope.account, {from: $scope.account})
 			.then(function (count) {
 				$timeout(function () {
@@ -90,14 +93,38 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 										Project.at(addr).getInfo.call({from: $scope.account})
 											.then(function (values) {
 												$timeout(function () {
+													var f = false;
+													var rf = false;
+													var g = Number(values[1].valueOf());
+													var r = Number(values[4].valueOf());
+													var mf = Number(values[5].valueOf());
+													var d = Number(values[2].valueOf());
+													var mess = "";
+													console.log("Enne "+d+" "+g+" "+r+" "+mf+" "+f+" "+rf);
+													if (g > r && d*1000>date){
+														f=true;
+													}
+													if (g > r && mf>0){
+														rf=true;
+													}
+													if (g <= r){
+														mess="Goal reached!";
+													}
+													else if (d*1000<=date){
+														mess="Deadline passed!";
+													}
+													console.log(g+" "+r+" "+mf+" "+f+" "+rf);
 													$scope.projects.push({
 														name: $scope.hex2str(values[0]),
-														goal: values[1].valueOf(),
-														deadline: values[2].valueOf()*1000,
+														goal: g,
+														deadline: d*1000,
 														owner: values[3].valueOf(),
-														raised: values[4].valueOf(),
-														myFunding: values[5].valueOf(),
-														address: values[6].valueOf()
+														raised: r,
+														myFunding: mf,
+														address: values[6].valueOf(),
+														fundable: f,
+														refundable: rf,
+														message: mess
 													});
 												});
 											})

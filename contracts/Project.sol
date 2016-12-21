@@ -14,9 +14,8 @@ contract Project {
     address[] funders;
     mapping (address => uint) amounts;
     
-    modifier onlyOwner() { if (msg.sender == attribs.owner) _; else throw;}
-    modifier afterDeadline() { if (attribs.deadline <= now) _;}
-    modifier raisedLess() { if (attribs.amountRaised < attribs.goalAmount) _;}
+    modifier goalNotReached() { if (attribs.amountRaised < attribs.goalAmount) _;}
+    modifier goalReached() { if (attribs.amountRaised >= attribs.goalAmount) _;}
     
     function Project(address _owner, bytes32 _name,  uint _goal, uint _deadline) {
         attribs = Attribs(_owner, _name,  _goal, now + _deadline, 0, 0);
@@ -24,29 +23,39 @@ contract Project {
 
     function fund(address funder) payable returns(bool) {
         if (msg.value > 0){
-            if(attribs.deadline > now && attribs.goalAmount > attribs.amountRaised){
+            if(now <= attribs.deadline && attribs.goalAmount > attribs.amountRaised){
                 amounts[funder] += msg.value;
                 funders.push(funder);
                 attribs.amountRaised += msg.value;
+                
+                //when goal reached with this payment then payout
+                if(attribs.goalAmount <= attribs.amountRaised)
+                    payout();
             }
             else{
                 if(!funder.send(msg.value))
                     return false;
+                
+                //when deadline passed then refund 
+                if(now > attribs.deadline)
+                    refund();
             }
             
             return true;
         }
     }
 
-    function payout() onlyOwner() afterDeadline() returns(bool) {
-        if(!attribs.owner.send(this.balance))
-            throw;
+    function payout() goalReached() returns(bool) {
+        if(attribs.owner.send(this.balance)){
+            return true;
+        }
         
-        return true;
+        return false;
     }
 	
-    function refund() raisedLess() returns(bool) {
+    function refund() goalNotReached() returns(bool) {
         uint v;
+        //when msg.sender is owner then refund to all funders
         if(msg.sender==attribs.owner){
             for (uint i = 0; i<funders.length; i++){
                 address funder = funders[i];
@@ -61,6 +70,7 @@ contract Project {
                         amounts[funder] = v;
                 }
             }
+        //when msg.sender is not owner then refund to msg.sender
         }else{
             v = amounts[msg.sender];
             if(v > 0){

@@ -9,11 +9,10 @@ body {
 
 label {
   display: inline-block;
-  width: 100px;
+  width: 160px;
 }
 
 input {
-  width: 500px;
   padding: 5px;
   font-size: 16px;
 }

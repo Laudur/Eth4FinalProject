@@ -8,10 +8,10 @@ contract FundingHub {
 	function FundingHub() {
 	}
 
-	function createProject(bytes32 name,  uint goal, uint deadline) returns(uint projectID) {
+	function createProject(bytes32 name,  uint goal, uint deadline) returns(address project) {
 		Project p = new Project(msg.sender, name,  goal, deadline);
 		projects.push(p);
-		return projects.length;
+		return p;
 	}
 	
 	function contribute(address project) payable returns(bool) {

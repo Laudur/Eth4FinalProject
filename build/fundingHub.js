@@ -31858,6 +31858,7 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 				newDeadline*60,
 				{ from: $scope.account, gas: 500000, gasPrice: web3.eth.gasPrice.toString(10) })
 			.then(function (tx) {
+				console.log("Project tx"+tx);
 				return web3.eth.getTransactionReceiptMined(tx);
 			})
 			.then(function (receipt) {
@@ -31901,7 +31902,6 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 													var mf = Number(values[5].valueOf());
 													var d = Number(values[2].valueOf());
 													var mess = "";
-													console.log("Enne "+d+" "+g+" "+r+" "+mf+" "+f+" "+rf);
 													if (g > r && d*1000>date){
 														f=true;
 													}
@@ -31914,7 +31914,6 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 													else if (d*1000<=date){
 														mess="Deadline passed!";
 													}
-													console.log(g+" "+r+" "+mf+" "+f+" "+rf);
 													$scope.projects.push({
 														name: $scope.hex2str(values[0]),
 														goal: g,

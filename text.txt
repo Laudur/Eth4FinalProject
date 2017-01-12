@@ -1,5 +1,9 @@
 0x764cabbe00695eb4f17a660d30d9d461e5a945c7
 
+laptop:
+0: 0x2b89c01fa521184f2b77e8b4ad6c2d3724bef5f0
+1: 0xf54a816198caa87bf673945344e779967c5341e4
+2: 0x3dcf3a56f8751a4836421214e18d84452890191e
 
 
 geth --datadir ~/.ethereum/net88 --networkid 88 --rpc --rpcport 8545 --rpcaddr 0.0.0.0 --rpccorsdomain "*" --rpcapi "eth,web3" --fast --cache=2048 --jitvm --password pass.txt -unlock "0" console
@@ -16,3 +20,6 @@ saddle genuine pen lab exhibit trade diary chaos pause just item squirrel
 
 approve small share shy bring narrow reason region reveal gown vital dream
 123
+
+web3.toWei(35, "ether")
+eth.sendTransaction({from: "0x2b89c01fa521184f2b77e8b4ad6c2d3724bef5f0", to: "0x3dcf3a56f8751a4836421214e18d84452890191e", value: web3.toWei(80, "ether")})

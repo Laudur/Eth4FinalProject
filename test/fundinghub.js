@@ -1,12 +1,48 @@
 contract('FundingHub', function(accounts) {
-  it("should put 10000 MetaCoin in the first account", function() {
-    var meta = FundingHub.deployed();
-
-    return meta.getBalance.call(accounts[0]).then(function(balance) {
-      assert.equal(balance.valueOf(), 10000, "10000 wasn't in the first account");
+  it("should be possible to refund", function() {
+    var account_one = accounts[0];
+    var account_two = accounts[1];
+console.log("Log1");
+    var hub = FundingHub.deployed();
+    hub.getProjectAddr.call(0, {from: account_one})
+    .then(function (values1) {
+          Project.at(values1).getInfo.call({from: account_one}).then(function(values) {
+		console.log(values[6].valueOf());
+              assert.equal(values[6].valueOf(), values1, "Initial project not created");
+    	  });
+	  var amount1 = 500;
+          var amount2 = 300;
+	  hub.contribute(values1, { from: account_one, gas: 500000, value: amount1, gasPrice: web3.eth.gasPrice.toString(10)})
+         .then(function () {
+		  Project.at(values1).getInfo.call({from: account_one})
+                  .then(function(values) {
+		      console.log("funded1="+values[5].valueOf()+" total="+values[4].valueOf());
+		      assert.equal(values[5].valueOf(), amount1, "Account not funded by account1");
+	    	  });
+          })
+          .then(function () {
+		  hub.contribute(values1, { from: account_two, gas: 500000, value: amount2, gasPrice: web3.eth.gasPrice.toString(10)})
+		  .then(function () {
+			  Project.at(values1).getInfo.call({from: account_two})
+		          .then(function(values) {
+				console.log("funded2="+values[5].valueOf()+" total="+values[4].valueOf());
+			      assert.equal(values[5].valueOf(), amount2, "Account not funded by account2");
+		    	  })
+			  .then(function () {
+				  Project.at(values1).refund({from: account_one})
+				   .then(function() {
+				          Project.at(values1).getInfo.call({from: account_two})
+				          .then(function(values) {
+					      console.log("total after 1st refund="+values[4].valueOf()+" total="+values[4].valueOf());
+					      assert.equal(values[4].valueOf(), amount2, "Project balance not "+amount2);
+				    	  });
+				   });
+			  });
+          	  });
+          });
     });
   });
-  it("should call a function that depends on a linked library", function() {
+  /*it("should call a function that depends on a linked library", function() {
     var meta = MetaCoin.deployed();
     var metaCoinBalance;
     var metaCoinEthBalance;
@@ -51,5 +87,5 @@ contract('FundingHub', function(accounts) {
       assert.equal(account_one_ending_balance, account_one_starting_balance - amount, "Amount wasn't correctly taken from the sender");
       assert.equal(account_two_ending_balance, account_two_starting_balance + amount, "Amount wasn't correctly sent to the receiver");
     });
-  });
+  });*/
 });

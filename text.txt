@@ -1,12 +1,12 @@
 0x764cabbe00695eb4f17a660d30d9d461e5a945c7
 
 laptop:
-0: 0x2b89c01fa521184f2b77e8b4ad6c2d3724bef5f0
-1: 0xf54a816198caa87bf673945344e779967c5341e4
-2: 0x3dcf3a56f8751a4836421214e18d84452890191e
+0: 0x075cd4c8ae6c70f7b510b26cc00e0f83a736df5e
+1: 
+2: 
 
 
-geth --datadir ~/.ethereum/net88 --networkid 88 --rpc --rpcport 8545 --rpcaddr 0.0.0.0 --rpccorsdomain "*" --rpcapi "eth,web3" --fast --cache=2048 --jitvm --password pass.txt -unlock "0" console
+geth --datadir ~/.ethereum/net13 --networkid 13 --rpc --rpcport 8545 --rpcaddr 127.0.0.1 --rpccorsdomain "*" --rpcapi "eth,net,web3" --fast --cache=2048 --password pass.txt -unlock "0" console
 
 
 $ mkdir app/javascripts/_vendor

@@ -31811,38 +31811,36 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 	$scope.prCount = "";
 	$scope.status = "";
 	$scope.balance="";
+        $scope.contract="";
 
 	$scope.reFund = function(projectAddr, name) {
 		console.log("reFund: projectAddr="+projectAddr+" name="+name);
-		$scope.status = "Refunding from project "+name;
+		$scope.status = "Refunding from project: "+name;
 		Project.at(projectAddr).refund(
 				{ from: $scope.account, gas: 500000, gasPrice: web3.eth.gasPrice.toString(10)})
-			.then(function (tx) {
-				return web3.eth.getTransactionReceiptMined(tx);
-			})
-			.then(function (receipt) {
-					console.log("Project "+name+" refunded");
+			.then(function(result) {
+				console.log("Refunded "+result.tx+" "+result.logs);
+				console.log(result.receipt);
 				$scope.status = "Project "+name+" refunded";
 				$scope.collectProjects();
+				return web3.eth.getTransactionReceiptMined(result.tx);
 			});
 	};
 
 	$scope.fundProject = function(projectAddr, fundAmont, name) {
 		console.log("fundProject: projectAddr="+projectAddr+" fundAmont="+fundAmont+" name="+name);
 		if(fundAmont>=1){
-			$scope.status = "Funding project "+name;
-			FundingHub.deployed()
-				.contribute(
-					projectAddr,
-					{ from: $scope.account, gas: 500000, value: fundAmont, gasPrice: web3.eth.gasPrice.toString(10)})
-				.then(function (tx) {
-					return web3.eth.getTransactionReceiptMined(tx);
-				})
-				.then(function (receipt) {
-					console.log("Project "+name+" funded");
-					$scope.status = "Project "+name+" funded";
-					$scope.collectProjects();
-				});
+			$scope.status = "Funding project: "+name;
+			FundingHub.deployed().then(function(instance) {
+			  deployed = instance;  
+			  return deployed.contribute(projectAddr, { from: $scope.account, gas: 500000, value: fundAmont*1000000000000000000, gasPrice: web3.eth.gasPrice.toString(10)});
+			}).then(function(result) {
+				console.log("Contributed "+result.tx+" "+result.logs);
+				console.log(result.receipt);
+				$scope.status = "Project "+name+" funded";
+				$scope.collectProjects();
+				return web3.eth.getTransactionReceiptMined(result.tx);
+			});
 		}else{
 			$scope.status = "Funding amount too small!";
 		}
@@ -31851,20 +31849,19 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 	$scope.addProject = function(newName, newGoal, newDeadline) {
 		console.log("addProject: newName="+newName+" newGoal"+ newGoal+" newDeadline"+ newDeadline);
 		$scope.status = "Adding project "+newName;
-		FundingHub.deployed()
-			.createProject(
+		FundingHub.deployed().then(function(instance) {
+			  deployed = instance;  
+			  return deployed.createProject(
 				newName,
-				newGoal,
+				newGoal*1000000000000000000,
 				newDeadline*60,
-				{ from: $scope.account, gas: 500000, gasPrice: web3.eth.gasPrice.toString(10) })
-			.then(function (tx) {
-				console.log("Project tx"+tx);
-				return web3.eth.getTransactionReceiptMined(tx);
-			})
-			.then(function (receipt) {
+				{ from: $scope.account, gas: 500000, gasPrice: web3.eth.gasPrice.toString(10) });
+			}).then(function(result) {
 				console.log("Project "+newName+" added");
 				$scope.status = "Project "+newName+" added";
+				console.log(result.receipt);
 				$scope.collectProjects();
+				return web3.eth.getTransactionReceiptMined(result.tx);
 			});
 	};
 
@@ -31878,73 +31875,89 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 
 
 	$scope.collectProjects = function() {
-		$scope.balance = web3.eth.getBalance($scope.account).valueOf();
+		$scope.balance = web3.eth.getBalance($scope.account).valueOf()/1000000000000000000;
 		$scope.projects = [];
 		var dt = new Date();
 		var date = dt.getTime();
 		console.log("Time: "+date);
-		FundingHub.deployed().getProjectCount.call($scope.account, {from: $scope.account})
+		FundingHub.deployed().then(function(instance) {
+console.log("instance: "+instance);
+		  $scope.contract = instance.address;
+		  //deployed = instance;  
+		  return instance.getProjectCount.call($scope.account, {from: $scope.account})
 			.then(function (count) {
 				$timeout(function () {
 					if (count.valueOf() > 0) {
-						for (var i = 0; i < count.valueOf(); i++) {
-							FundingHub.deployed().getProjectAddr.call(i, {from: $scope.account})
-								.then(function (values1) {
-									$timeout(function () {
-										var addr = values1.valueOf();
-										Project.at(addr).getInfo.call({from: $scope.account})
-											.then(function (values) {
-												$timeout(function () {
-													var f = false;
-													var rf = false;
-													var g = Number(values[1].valueOf());
-													var r = Number(values[4].valueOf());
-													var mf = Number(values[5].valueOf());
-													var d = Number(values[2].valueOf());
-													var mess = "";
-													if (g > r && d*1000>date){
-														f=true;
-													}
-													if (g > r && mf>0){
-														rf=true;
-													}
-													if (g <= r){
-														mess="Goal reached!";
-													}
-													else if (d*1000<=date){
-														mess="Deadline passed!";
-													}
-													$scope.projects.push({
-														name: $scope.hex2str(values[0]),
-														goal: g,
-														deadline: d*1000,
-														owner: values[3].valueOf(),
-														raised: r,
-														myFunding: mf,
-														address: values[6].valueOf(),
-														fundable: f,
-														refundable: rf,
-														message: mess
-													});
+						console.log("count: "+count);
+  						var c = count.valueOf();
+						for (var i = 0; i < c; i++) {
+								console.log("i: "+i);
+							 instance.getProjectAddr.call(i, {from: $scope.account})
+							.then(function (values1) {
+								$timeout(function () {
+									var addr = values1.valueOf();
+									console.log("addr: "+addr);
+									Project.at(addr).getInfo.call({from: $scope.account})
+										.then(function (values) {
+											$timeout(function () {
+												var f = false;
+												var rf = false;
+												var g = Number(values[1].valueOf());
+												var r = Number(values[4].valueOf());
+												var mf = Number(values[5].valueOf());
+												var d = Number(values[2].valueOf());
+												var mess = "";
+												if (g > r && d*1000>date){
+													f=true;
+												}
+												if (g > r && mf>0){
+													rf=true;
+												}
+												if (g <= r){
+													mess="Goal reached!";
+												}
+												else if (d*1000<=date){
+													mess="Deadline passed!";
+												}
+												$scope.projects.push({
+													name: $scope.hex2str(values[0]),
+													goal: g/1000000000000000000,
+													deadline: d*1000,
+													owner: values[3].valueOf(),
+													raised: r/1000000000000000000,
+													myFunding: mf/1000000000000000000,
+													address: values[6].valueOf(),
+													fundable: f,
+													refundable: rf,
+													message: mess
 												});
-											})
-											.catch(function (e) {
-												console.log("Problem calling getInfo");
-												console.error(e);
 											});
-									});
-								})
-								.catch(function (e) {
-									console.log("Problem calling getProjectAddr");
-									console.error(e);
-								});						
+										})
+										.catch(function (e) {
+											console.log("Problem calling getInfo");
+											console.error(e);
+										});
+								});
+							})
+							.catch(function (e) {
+								console.log("Problem calling getProjectAddr");
+								console.error(e);
+							});
 						}
 					}
 				});
 			});
+}).then(function(result) {
+console.log("End result");
+  // result is an object with the following values:
+  //
+  // result.tx      => transaction hash, string
+  // result.logs    => array of decoded events that were triggered within this transaction
+  // result.receipt => transaction receipt object, which includes gas used
+});
 	};
 
-	/*$window.onload = function () {
+	$window.onload = function () {
 		initUtils(web3);
 		web3.eth.getAccounts(function(err, accs) {
 			if (err != null) {
@@ -31963,20 +31976,22 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 			console.log($scope.account);
 			$scope.collectProjects();
 		});
-	}*/
-	$window.onload = function () {
+	}
+	/*$window.onload = function () {
 		    initUtils(web3);
 		    // Example of seed 'unhappy nerve cancel reject october fix vital pulse cash behind curious bicycle'
-		    var seed = prompt('Enter your private key seed', '12 words long');;
+		    //var seed = prompt('Enter your private key seed', '12 words long');
+var seed = lightwallet.keystore.generateRandomSeed();
 		    // the seed is stored in memory and encrypted by this user-defined password
 		    var password = prompt('Enter password to encrypt the seed', 'dev_password');
-
-		    lightwallet.keystore.deriveKeyFromPassword(password, function(err, _pwDerivedKey) {
+var salt = lightwallet.keystore.generateSalt();
+		    lightwallet.keystore.deriveKeyFromPassword(password, salt, function(err, _pwDerivedKey) {
 			pwDerivedKey = _pwDerivedKey;
 			ks = new lightwallet.keystore(seed, pwDerivedKey);
 			// Create a custom passwordProvider to prompt the user to enter their
 			// password whenever the hooked web3 provider issues a sendTransaction
 			// call.
+			console.log("1");
 			ks.passwordProvider = function (callback) {
 			    var pw = prompt("Please enter password to sign your transaction", "dev_password");
 			    callback(null, pw);
@@ -31986,19 +32001,25 @@ app.controller("fundingHubController", [ '$scope', '$location', '$http', '$q', '
 			    host: web3.currentProvider.host,
 			    transaction_signer: ks
 			});
+			console.log("2");
 			web3.setProvider(provider);
 			// And since Truffle v2 uses EtherPudding v3, we also need the line:
+			console.log("3");
 			FundingHub.setProvider(provider);
+			console.log("4");
 			Project.setProvider(provider);
+			console.log("seed "+seed);
 			// Generate the first address out of the seed
-			ks.generateNewAddress(pwDerivedKey);
+			ks.generateNewAddress(pwDerivedKey, 1);
+			console.log("6");
 			$scope.accounts = ks.getAddresses();
+			console.log("7");
 			$scope.account = "0x" + $scope.accounts[0];
 			console.log("Your account is " + $scope.account);
 			$scope.balance = web3.eth.getBalance($scope.account).valueOf();
 			$scope.collectProjects();
 		});
-	}
+	}*/
 
 }]);
 

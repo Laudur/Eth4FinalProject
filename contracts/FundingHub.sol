@@ -1,6 +1,6 @@
 pragma solidity ^0.4.4;
 
-import "Project.sol";
+import "./Project.sol";
 
 contract FundingHub {
 	Project[] projects;
